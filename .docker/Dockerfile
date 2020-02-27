@@ -3,6 +3,7 @@ FROM node AS build
 WORKDIR /app
 COPY .. .
 
+COPY environment.prod.ts /app/src/environments/environment.prod.ts
 RUN npm install && npm run build
 
 FROM nginx:stable
