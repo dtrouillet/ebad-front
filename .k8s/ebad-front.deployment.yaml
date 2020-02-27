@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ebad-frontend
+  labels:
+    app: ebad-frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ebad
+  template:
+    metadata:
+      labels:
+        app: ebad
+    spec:
+      containers:
+        - name: ebad-frontend
+          image: kms77/ebad:front-0.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+            - containerPort: 443

@@ -1,0 +1,109 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: ebad-bdd-cm
+  name: ebad-bdd-cm
+data:
+  POSTGRES_DB: ebad
+  POSTGRES_USER: ebad
+
+---
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ebad-bdd-pv
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-storage
+  local:
+    path: /Developpement/tmp/data/db
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - minikube
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ebad-bdd-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+
+apiVersion:  apps/v1
+kind: StatefulSet
+metadata:
+  name: ebad-bdd
+  labels:
+    app: ebad-bdd
+spec:
+  selector:
+    matchLabels:
+      app: ebad-bdd
+  serviceName: ebad-bdd
+  template:
+    metadata:
+      labels:
+        app: ebad-bdd
+    spec:
+      volumes:
+        - name: ebad-bdd-volume
+          persistentVolumeClaim:
+            claimName: ebad-bdd-pvc
+      containers:
+      - env:
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: ebad-bdd-cm
+              key: POSTGRES_DB
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: ebad-bdd-cm
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ebad-secrets
+              key: postgres-password
+        name: ebad-bdd-container
+        image: postgres:11-alpine
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - mountPath: /var/lib/postgresql/data
+            name: ebad-bdd-volume
+        ports:
+          - containerPort: 5432
+        resources: {}
+
+
+

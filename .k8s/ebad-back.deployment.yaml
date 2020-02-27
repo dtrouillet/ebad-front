@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: ebad-back-cm
+  name: ebad-back-cm
+data:
+  SPRING_PROFILES_ACTIVE: jwt,heroku
+  JDBC_DATABASE_URL: jdbc:postgresql://ebad-bdd:5432/ebad
+  JDBC_DATABASE_USERNAME: ebad
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ebad-backend
+  name: ebad-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ebad-backend
+  template:
+    metadata:
+      labels:
+        app: ebad-backend
+      name: ebad-backend
+    spec:
+      containers:
+        - env:
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: ebad-backend-cm
+                  key: SPRING_PROFILES_ACTIVE
+            - name: JDBC_DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ebad-backend-cm
+                  key: JDBC_DATABASE_URL
+            - name: JDBC_DATABASE_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ebad-backend-cm
+                  key: JDBC_DATABASE_USERNAME
+            - name: JDBC_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ebad-secrets
+                  key: postgres-password
+          image: kms77/ebad:back-0.1
+          imagePullPolicy: IfNotPresent
+          name: ebad-backend-container
+          ports:
+            - containerPort: 13000
+          #resources:
+
