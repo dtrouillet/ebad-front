@@ -2,8 +2,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    app: ebad-back-cm
-  name: ebad-back-cm
+    app: ebad-backend-cm
+  name: ebad-backend-cm
 data:
   SPRING_PROFILES_ACTIVE: jwt,heroku
   JDBC_DATABASE_URL: jdbc:postgresql://ebad-bdd:5432/ebad
@@ -50,10 +50,28 @@ spec:
                 secretKeyRef:
                   name: ebad-secrets
                   key: postgres-password
-          image: kms77/ebad:back-0.1
+          image: kms77/ebad:back-0.1 #image for testing only
           imagePullPolicy: IfNotPresent
           name: ebad-backend-container
           ports:
-            - containerPort: 13000
-          #resources:
+            - containerPort: 10300
+          readinessProbe:
+              httpGet:
+                path: /ebad/csrf #To change with /ebad/health when authentication is ok
+                port: 10300
+              initialDelaySeconds: 40
+              timeoutSeconds: 1
+              periodSeconds: 2
+              failureThreshold: 1
+          livenessProbe:
+              httpGet:
+                path: /ebad/csrf #To change with /ebad/health when authentication is ok
+                port: 10300
+              initialDelaySeconds: 60
+              timeoutSeconds: 1
+              periodSeconds: 5
+              failureThreshold: 1
+          # resources:
+          #   limits:
+          #     cpu: 2m
 

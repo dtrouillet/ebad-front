@@ -32,7 +32,7 @@ spec:
     - ReadWriteOnce
   storageClassName: local-storage
   local:
-    path: /Developpement/tmp/data/db
+    path: /Volumes/Data/tmp/db #path to change for local-storage
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -40,7 +40,7 @@ spec:
             - key: kubernetes.io/hostname
               operator: In
               values:
-                - minikube
+                - docker-desktop
 
 ---
 

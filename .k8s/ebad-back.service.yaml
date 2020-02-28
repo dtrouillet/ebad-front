@@ -8,6 +8,6 @@ spec:
   selector:
     app: ebad-backend
   ports:
-    - name: "13000"
-      port: 13000
-      targetPort: 13000
+    - name: "10300"
+      port: 10300
+      targetPort: 10300

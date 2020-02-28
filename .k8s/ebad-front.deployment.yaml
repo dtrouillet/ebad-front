@@ -8,15 +8,15 @@ spec:
   replicas: 3
   selector:
     matchLabels:
-      app: ebad
+      app: ebad-frontend
   template:
     metadata:
       labels:
-        app: ebad
+        app: ebad-frontend
     spec:
       containers:
         - name: ebad-frontend
-          image: kms77/ebad:front-0.1
+          image: kms77/ebad:front-0.3 #image for testing only
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
